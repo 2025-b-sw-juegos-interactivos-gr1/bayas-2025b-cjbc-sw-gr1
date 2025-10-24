@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <circle cx="128" cy="128" r="120" fill="#ffffff" stroke="#000" stroke-width="4" />
+  <!-- Unos hexágonos/pentágonos simples -->
+  <g fill="#000000">
+    <polygon points="128,40 150,84 128,110 106,84" />
+    <polygon points="80,128 112,136 96,164 64,152" />
+    <polygon points="176,128 160,160 192,168 208,140" />
+  </g>
+</svg>
