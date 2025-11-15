@@ -1,0 +1,11 @@
+Model Information:
+* title:	Santa
+* source:	https://sketchfab.com/3d-models/santa-a682b18feb8243eaa3c83035216b5c02
+* author:	lawtrigg (https://sketchfab.com/lawtrigg)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Santa" (https://sketchfab.com/3d-models/santa-a682b18feb8243eaa3c83035216b5c02) by lawtrigg (https://sketchfab.com/lawtrigg) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

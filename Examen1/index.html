@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Babylon.js - Recoger y Dejar</title>
+<style>
+    html, body {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    #renderCanvas {
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+    }
+</style>
+<script src="https://cdn.babylonjs.com/babylon.js"></script>
+<script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+</head>
+
+<body>
+<canvas id="renderCanvas"></canvas>
+
+<script>
+const canvas = document.getElementById("renderCanvas");
+const engine = new BABYLON.Engine(canvas, true);
+
+// Variable de estado
+let paqueteEnMano = false;
+
+// Mapa de teclas
+let inputMap = {};
+
+const createScene = function () {
+    const scene = new BABYLON.Scene(engine);
+
+    const camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 10, -15), scene);
+    camera.setTarget(BABYLON.Vector3.Zero());
+    camera.attachControl(canvas, true);
+
+    const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
+
+    const matJugador = new BABYLON.StandardMaterial("matJugador", scene);
+    matJugador.diffuseColor = new BABYLON.Color3(0, 0.5, 1);
+
+    const matPaquete = new BABYLON.StandardMaterial("matPaquete", scene);
+    matPaquete.diffuseColor = new BABYLON.Color3(1, 0, 0);
+
+    const matZona = new BABYLON.StandardMaterial("matZona", scene);
+    matZona.diffuseColor = new BABYLON.Color3(0, 1, 0);
+    matZona.alpha = 0.5;
+
+    const matSuelo = new BABYLON.StandardMaterial("matSuelo", scene);
+    matSuelo.diffuseTexture = new BABYLON.Texture('assets/textures/nieve.jpg', scene);
+    matSuelo.diffuseTexture.uScale = 1;
+    matSuelo.diffuseTexture.vScale = 1;
+    matSuelo.diffuseTexture.wrapU = BABYLON.Texture.CLAMP_ADDRESSMODE;
+    matSuelo.diffuseTexture.wrapV = BABYLON.Texture.CLAMP_ADDRESSMODE;
+    
+
+    const suelo = BABYLON.MeshBuilder.CreateGround("suelo", { width: 20, height: 20 }, scene);
+    suelo.material = matSuelo;
+
+    let jugador; 
+    let paquete;
+    let trineo;
+    
+    // Importar el modelo del santa
+    BABYLON.SceneLoader.ImportMeshAsync(null, "assets/models/santa/", "scene.gltf", scene)
+    .then((result) => {
+        const meshes = result.meshes;
+        if (meshes && meshes.length) {
+            jugador = meshes[0];
+            
+            // Escala para agrandar o reducir el modelo
+            jugador.scaling = new BABYLON.Vector3(2, 2, 2);
+            jugador.position = new BABYLON.Vector3(0, 0, 0);
+            // Girarlo hacia el campo del lado derecho (porque mira hacia otro lado por defecto)
+            jugador.rotation = new BABYLON.Vector3(0, Math.PI / 0.5, 0);
+
+            console.log("✅ Santa ubicado");
+        }
+    })
+    .catch((err) => {
+        console.error("❌ No se pudo cargar el modelo Santa:", err);
+    });
+
+
+
+    /*const jugador = BABYLON.MeshBuilder.CreateBox("jugador", { size: 1 }, scene);
+    jugador.material = matJugador;
+    jugador.position.y = 0.5;*/
+
+    // Importar el modelo del gift
+    BABYLON.SceneLoader.ImportMeshAsync(null, "assets/models/gift_box/", "scene.gltf", scene)
+    .then((result) => {
+        const meshes = result.meshes;
+        if (meshes && meshes.length) {
+        paquete = meshes[0];
+
+            // Escala para que no se vea gigante
+            paquete.scaling = new BABYLON.Vector3(0.005, 0.005, 0.005);
+            paquete.position = new BABYLON.Vector3(5, 0.25, 5);
+            // Girarlo hacia el campo del lado derecho (porque mira hacia otro lado por defecto)
+            paquete.rotation = new BABYLON.Vector3(0, Math.PI / 0.5, 0);
+
+            console.log("✅ paquete ubicado");
+        }
+    })
+    
+    .catch((err) => {
+        console.error("❌ No se pudo cargar el paquete", err);
+    });
+
+
+    /*const paquete = BABYLON.MeshBuilder.CreateBox("paquete", { size: 0.5 }, scene);
+    paquete.material = matPaquete;
+    paquete.position = new BABYLON.Vector3(5, 0.25, 5);*/
+
+    // Importar el modelo del trineo
+    BABYLON.SceneLoader.ImportMeshAsync(null, "assets/models/trineoSolo/", "scene.gltf", scene)
+    .then((result) => {
+        const meshes = result.meshes;
+        if (meshes && meshes.length) {
+            trineo = meshes[0];
+
+            // Agrandar el trineo
+            trineo.scaling = new BABYLON.Vector3(2, 2, 2);
+            trineo.position = new BABYLON.Vector3(-5, 0.01, -5);
+            // Girarlo hacia el campo del lado derecho (porque mira hacia otro lado por defecto)
+            trineo.rotation = new BABYLON.Vector3(0, Math.PI / 0.5, 0);
+
+            console.log("✅ trineo ubicado");
+        }
+    })
+
+    .catch((err) => {
+        console.error("❌ No se pudo cargar el modelo Trineo:", err);
+    });
+
+    
+    scene.actionManager = new BABYLON.ActionManager(scene);
+
+    scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, evt => {
+        inputMap[evt.sourceEvent.key.toLowerCase()] = true;
+    }));
+    scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, evt => {
+        inputMap[evt.sourceEvent.key.toLowerCase()] = false;
+    }));
+
+    scene.onKeyboardObservable.add(kbInfo => {
+        if (kbInfo.type === BABYLON.KeyboardEventTypes.KEYDOWN && kbInfo.event.key === " ") {
+            if (!paqueteEnMano) {
+                if (BABYLON.Vector3.Distance(jugador.position, paquete.position) < 2) {
+                    paquete.parent = jugador;
+                    paquete.position.set(0, 0.7, 0);
+                    paqueteEnMano = true;
+                }
+            } else {
+                if (BABYLON.Vector3.Distance(jugador.position, trineo.position) < 2) {
+                    paquete.parent = null;
+                    paquete.position.copyFrom(trineo.position);
+                    paquete.position.y = 0.25;
+                    paqueteEnMano = false;
+                }
+            }
+        }
+    });
+
+    const velocidad = 0.15;
+    scene.onBeforeRenderObservable.add(() => {
+        if (inputMap["w"]) jugador.position.z += velocidad;
+        if (inputMap["s"]) jugador.position.z -= velocidad;
+        if (inputMap["a"]) jugador.position.x -= velocidad;
+        if (inputMap["d"]) jugador.position.x += velocidad;
+    });
+
+    //importar el modelo de la House
+    BABYLON.SceneLoader.ImportMeshAsync(null, "assets/models/house/", "scene.gltf", scene)
+    .then((result) => {
+        const meshes = result.meshes;
+        if (meshes && meshes.length) {
+            const house = meshes[0];
+
+            // Escala para que no se vea gigante
+            house.scaling = new BABYLON.Vector3(0.7, 0.7, 0.7);
+            house.position = new BABYLON.Vector3(-9, 0, 10);
+            
+            
+
+            console.log("✅ House ubicado");
+        }
+    })
+
+    .catch((err) => {
+        console.error("❌ No se pudo cargar el modelo House:", err);
+    });
+
+
+    return scene;
+
+};
+
+const scene = createScene();
+engine.runRenderLoop(() => scene.render());
+window.addEventListener("resize", () => engine.resize());
+</script>
+
+</body>
+</html>
