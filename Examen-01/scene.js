@@ -1,5 +1,6 @@
 (function() {
     window.addEventListener('DOMContentLoaded', function () {
+        
         const canvas = document.getElementById("renderCanvas");
         const engine = new BABYLON.Engine(canvas, true);
 
@@ -11,21 +12,20 @@
         let inputMap = {};
 
         const createScene = function () {
-            const scene = new BABYLON.Scene(engine);
-            // Efecto de resplandor
-            const glow = new BABYLON.GlowLayer("glow", scene);
-            glow.intensity = 1.2;
 
+            const scene = new BABYLON.Scene(engine);
             const camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 10, -15), scene);
             camera.setTarget(BABYLON.Vector3.Zero());
             camera.attachControl(canvas, true);
 
+            // Luz hemisférica
             const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
-
+            
+            //suelo con textura de nieve
             const matSuelo = new BABYLON.StandardMaterial("matSuelo", scene);
             matSuelo.diffuseTexture = new BABYLON.Texture('assets/textures/nieve.jpg', scene);
             
-
+            // Crear el suelo
             const suelo = BABYLON.MeshBuilder.CreateGround("suelo", { width: 20, height: 20 }, scene);
             suelo.material = matSuelo;
 
@@ -47,7 +47,6 @@
                     return nuevo;
                 });
             }
-
 
             // Importar el modelo del santa
             BABYLON.SceneLoader.ImportMeshAsync(null, "assets/models/santa/", "scene.gltf", scene)
@@ -209,7 +208,6 @@
         const scene = createScene();
         engine.runRenderLoop(() => scene.render());
         window.addEventListener("resize", () => engine.resize());
-
 
 
     });

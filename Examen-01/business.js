@@ -1,6 +1,6 @@
 (function () {
     window.addEventListener("DOMContentLoaded", function () {
-        //botón para iniciar el juego
+        //iniciar el juego
         const startButton = document.getElementById("startButton");
         const instructionsModal = document.getElementById("instructionsModal");
 
